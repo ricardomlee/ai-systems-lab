@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  llm-benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: llm-benchmark
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      # Cache models persistently
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      # Mount benchmark code
+      - ./python:/app/python
+      - ./rust:/app/rust
+      - ./benchmarks:/app/benchmarks
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
